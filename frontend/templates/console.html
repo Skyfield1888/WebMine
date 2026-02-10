@@ -5,7 +5,7 @@
 <div hx-ext="ws" ws-connect="/console/ws">
     <div class="mockup-code w-full" id="console">
     </div>
-    <form ws-send id="console-input">
+    <form ws-send id="console-input" hx-on::submit="setTimeout(() => this.reset(), 10)">
             <input type="text" name="command" placeholder="Enter Minecraft command" class="input input-md w-full">
     </form>                         
 </div>
