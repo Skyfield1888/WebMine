@@ -13,7 +13,7 @@
                 <input type="hidden" name="property" value="{{$key}}">
                 
                 {{if eq $data.type "bool"}}
-                    <select name="value"
+                    <select class="select select-neutral" name="value"
                             hx-post="/properties/set" 
                             hx-include="previous input[name='property']" 
                             hx-trigger="change">
@@ -21,19 +21,19 @@
                         <option value="false" {{if eq $data.value "false"}}selected{{end}}>false</option>
                     </select>
                 {{else if eq $data.type "int"}}
-                    <input type="number" name="value" value="{{$data.value}}" step="1"
+                    <input class="input input-neutral" type="number" name="value" value="{{$data.value}}" step="1"
                            hx-post="/properties/set" 
                            hx-include="previous input[name='property']" 
                            hx-trigger="blur"
                            onkeydown="if(event.key === 'Enter') this.blur()">
                 {{else if eq $data.type "float"}}
-                    <input type="number" name="value" value="{{$data.value}}" step="0.01"
+                    <input class="input input-neutral" type="number" name="value" value="{{$data.value}}" step="0.01"
                            hx-post="/properties/set" 
                            hx-include="previous input[name='property']" 
                            hx-trigger="blur"
                            onkeydown="if(event.key === 'Enter') this.blur()">
                 {{else if eq $key "difficulty"}}
-                    <select name="value"
+                    <select class="select select-neutral" name="value"
                             hx-post="/properties/set" 
                             hx-include="previous input[name='property']" 
                             hx-trigger="change">
@@ -43,7 +43,7 @@
                         <option value="hard" {{if eq $data.value "hard"}}selected{{end}}>hard</option>
                     </select>
                 {{else if eq $key "gamemode"}}
-                    <select name="value"
+                    <select class="select select-neutral" name="value"
                             hx-post="/properties/set" 
                             hx-include="previous input[name='property']" 
                             hx-trigger="change">
@@ -53,7 +53,7 @@
                         <option value="adventure" {{if eq $data.value "adventure"}}selected{{end}}>adventure</option>
                     </select>
                 {{else}}
-                    <input type="text" name="value" placeholder="{{$data.value}}" value="{{$data.value}}"
+                    <input class="input input-neutral" type="text" name="value" placeholder="{{$data.value}}" value="{{$data.value}}"
                            hx-post="/properties/set" 
                            hx-include="previous input[name='property']" 
                            hx-trigger="blur"
