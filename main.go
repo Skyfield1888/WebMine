@@ -2,6 +2,7 @@ package main
 
 import (
 	"Skyfield1888/WebMine/backend"
+	filesdownload "Skyfield1888/WebMine/backend/files_download"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,6 +10,12 @@ import (
 
 func main() {
 	backend.DecodeConfig()
+
+	err := filesdownload.CheckFolderStructure()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	log.Println("Starting Minecraft server WebSocket controller")
 	//Console
 	http.HandleFunc("/console/ws", backend.WsHandler)
@@ -36,6 +43,8 @@ func main() {
 	http.HandleFunc("/chart/ram", backend.RamLineHandler)
 	http.HandleFunc("/chart/players", backend.PlayerLineHandler)
 
-	fmt.Println("Server listening on :8082")
-	log.Fatal(http.ListenAndServe(":"+backend.SavedAppConfig.WebAppConfig.Port, nil))
+	port := ":"+backend.SavedAppConfig.WebAppConfig.Port
+
+	fmt.Printf("Server listening on %s\n", port)
+	log.Fatal(http.ListenAndServe(port, nil))
 }

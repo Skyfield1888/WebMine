@@ -48,7 +48,7 @@ func checkStrType(s string, initialValue string) error {
 }
 
 func readServerPropertiesFile() map[string]string {
-	path := SavedAppConfig.MinecraftServerConfig.PathToMcServer + "server.properties"
+	path := SavedAppConfig.MinecraftServerConfig.PathToMcServers + "server.properties"
 
 	f, err := os.Open(path)
 	Check(err)
@@ -122,13 +122,15 @@ func ChangePropertiesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ServerProperties[property] = value
-	writeServerPropertiesFile(ServerProperties, SavedAppConfig.MinecraftServerConfig.PathToMcServer)
+	writeServerPropertiesFile(ServerProperties, SavedAppConfig.MinecraftServerConfig.PathToMcServers)
 	http.Redirect(w, r, "/properties/view", http.StatusSeeOther)
 }
 
-var propertiesTemplate = template.Must(template.New("properties.html").ParseFiles("./frontend/templates/properties.html"))
+
 
 func PropertiesTableHandler(w http.ResponseWriter, r *http.Request) {
+	var propertiesTemplate = template.Must(template.New("properties.html").ParseFiles("./frontend/templates/properties.html"))
+	
 	w.Header().Set("Content-Type", "text/html")
 	ServerProperties = readServerPropertiesFile()
 

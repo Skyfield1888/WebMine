@@ -1,5 +1,5 @@
 [MinecraftServerConfig]
-  PathToMcServer = "../mcserver/"
+  PathToMcServers = "../mcservers/"
   MaxAllowedRam = "1024M"
   MinAllowedRam = "1024M"
   ServerJarName = "server.jar"

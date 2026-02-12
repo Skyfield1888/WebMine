@@ -19,9 +19,9 @@ type WebAppConfig struct {
 }
 
 type MinecraftServerConfig struct {
-	PathToMcServer         string
-	MaxAllowedRam           string
-	MinAllowedRam           string
+	PathToMcServers        string
+	MaxAllowedRam          string
+	MinAllowedRam          string
 	ServerJarName          string
 	OthersCommandArguments string
 }
@@ -52,12 +52,12 @@ func structToMap(s interface{}) map[string]map[string]string {
 }
 
 func DecodeConfig() {
-	_, err := toml.DecodeFile("./backend/app_settings.toml", &SavedAppConfig)
+	_, err := toml.DecodeFile("./app_settings.toml", &SavedAppConfig)
 	Check(err)
 }
 
 func EncodeConfig() {
-	file, err := os.Create("./backend/app_settings.toml")
+	file, err := os.Create("./app_settings.toml")
 	Check(err)
 	defer file.Close()
 
@@ -104,9 +104,11 @@ func ChangeAppSettingsHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/settings/view", http.StatusSeeOther)
 }
 
-var appSettingsTemplate = template.Must(template.New("app_settings.html").ParseFiles("./frontend/templates/app_settings.html"))
+
 
 func AppSettingsTableHandler(w http.ResponseWriter, r *http.Request) {
+	var appSettingsTemplate = template.Must(template.New("app_settings.html").ParseFiles("./frontend/templates/app_settings.html"))
+
 	w.Header().Set("Content-Type", "text/html")
 	DecodeConfig()
 

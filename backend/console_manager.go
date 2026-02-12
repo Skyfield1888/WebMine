@@ -85,10 +85,10 @@ func (mc *McServer) Start() error {
 	arg5 := SavedAppConfig.MinecraftServerConfig.OthersCommandArguments
 
 	cmd := exec.Command(command, arg1, arg2, arg3, arg4, arg5)
-	cmd.Dir = SavedAppConfig.MinecraftServerConfig.PathToMcServer
+	cmd.Dir = SavedAppConfig.MinecraftServerConfig.PathToMcServers
 	mc.cmd = cmd
 
-	fmt.Printf("\nExecuting command: %s %s %s %s in directory %s", command, arg1, arg2, arg3, SavedAppConfig.MinecraftServerConfig.PathToMcServer)
+	fmt.Printf("\nExecuting command: %s %s %s %s in directory %s", command, arg1, arg2, arg3, SavedAppConfig.MinecraftServerConfig.PathToMcServers)
 
 	// Pipes from cmd
 	stdout, err := mc.cmd.StdoutPipe()
@@ -621,8 +621,8 @@ func PlayerLineHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(buf.Bytes())
 }
 
-var consoleTemplate = template.Must(template.New("console.html").ParseFiles("./frontend/templates/console.html"))
-
 func ConsoleHandler(w http.ResponseWriter, r *http.Request) {
+	var consoleTemplate = template.Must(template.New("console.html").ParseFiles("./frontend/templates/console.html"))
+
 	consoleTemplate.ExecuteTemplate(w, "console.html", nil)
 }

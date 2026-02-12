@@ -7,6 +7,7 @@ require github.com/gorilla/websocket v1.5.3 // direct
 require github.com/BurntSushi/toml v1.6.0
 
 require (
+	github.com/go-echarts/go-echarts v1.0.0 // indirect
 	github.com/go-echarts/go-echarts/v2 v2.6.7 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect

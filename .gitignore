@@ -31,5 +31,5 @@ go.work.sum
 # .idea/
 # .vscode/
 
-# Node/daisyUI
-node_modules/
+backend/files_download/test/
+testing.go
