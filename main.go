@@ -31,6 +31,10 @@ func main() {
 	http.Handle("/templates/", http.FileServer(http.Dir("frontend")))
 	http.Handle("/", http.FileServer(http.Dir("frontend/static")))
 
+	//Charts Handelers
+	http.HandleFunc("/chart/cpu", backend.CpuLineHandler)
+	http.HandleFunc("/chart/ram", backend.RamLineHandler)
+
 	fmt.Println("Server listening on :8082")
 	log.Fatal(http.ListenAndServe(":"+backend.SavedAppConfig.WebAppConfig.Port, nil))
 }

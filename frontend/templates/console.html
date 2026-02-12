@@ -1,22 +1,69 @@
-<button hx-post="/console/start" hx-swap="none" class="btn btn-success"><i class="bi bi-power"></i>START SERVER</button>
-<button hx-post="/console/restart" hx-swap="none" class="btn btn-primary"><i class="bi bi-arrow-repeat"></i>Restart Server</button>
-<button hx-post="/console/stop" hx-swap="none" class="btn btn-error" ><i class="bi bi-app"></i>STOP SERVER</button>
+<div class="join join-vertical">
+    <button hx-post="/console/start" hx-swap="none" class="btn btn-success join-item"><i class="bi bi-power"></i>START SERVER</button>
+    <button hx-post="/console/restart" hx-swap="none" class="btn btn-primary join-item"><i class="bi bi-arrow-repeat"></i>Restart Server</button>
+    <button hx-post="/console/stop" hx-swap="none" class="btn btn-error join-item" ><i class="bi bi-app"></i>STOP SERVER</button>
+</div>
+<div class="join">
+    <div class="card card-bordered w-[300px] bg-accent text-accent-content join-item">
+        <div class="card-body p-2 gap-0">
+            <h1 class="card-title text-sm" id="cpuUsage">CPU Usage : ??%</h1>
+            <div 
+                class="w-[300px] h-[200px]" 
+                id="cpuUsageChart" 
+                hx-get="/chart/cpu" 
+                hx-trigger="load, every 2s" 
+                hx-target="#cpuUsageChart"
+                hx-swap="innerHTML">
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-bordered w-[300px] bg-secondary text-secondary-content join-item">
+        <div class="card-body p-2 gap-0">
+            <h1 class="card-title text-sm" id="ramUsage">RAM Usage : ?? mb</h1>
+            <div 
+                class="w-[300px] h-[200px]" 
+                id="ramUsageChart" 
+                hx-get="/chart/ram" 
+                hx-trigger="load, every 2s" 
+                hx-target="#ramUsageChart"
+                hx-swap="innerHTML">
+            </div>
+        </div>
+    </div>
+</div>
 
 <div hx-ext="ws" ws-connect="/console/ws">
     <div class="mockup-code w-full" id="console">
     </div>
-    <form ws-send id="console-input" hx-on::submit="setTimeout(() => this.reset(), 10)">
-            <input type="text" name="command" placeholder="Enter Minecraft command" class="input input-md w-full">
-    </form>                         
+    <form ws-send id="console-input">
+        <input 
+            type="text" 
+            name="command" 
+            placeholder="Enter Minecraft command" 
+            class="input input-md w-full"
+            onkeydown="if(event.key === 'Enter') setTimeout(() => this.value = '', 0)">
+    </form>                  
 </div>
 <script>
     document.body.addEventListener('htmx:wsAfterMessage', function(event) {
+        const data = JSON.parse(event.detail.message);
         const consoleDiv = document.getElementById('console');
-        const pre = document.createElement('pre');
-        const code = document.createElement('code');
-        code.textContent = event.detail.message;
-        pre.appendChild(code);
-        consoleDiv.appendChild(pre);
-        consoleDiv.scrollTop = consoleDiv.scrollHeight;
+
+        if (data.type === "stats") {
+            document.getElementById('cpuUsage').textContent ="CPU Usage : " + data.cpu.toFixed(2) + "%";
+            document.getElementById('ramUsage').textContent ="RAM Usage : " + data.ram_mb + " Mb";
+        } else {
+            const pre = document.createElement('pre');
+            const code = document.createElement('code');
+
+            if (data.type === "error")        code.className = "text-error";
+            else if (data.type === "stopped") code.className = "text-warning";
+
+            code.textContent = data.text;
+            pre.appendChild(code);
+            consoleDiv.appendChild(pre);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
     });
 </script>
