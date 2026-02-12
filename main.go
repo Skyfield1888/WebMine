@@ -34,6 +34,7 @@ func main() {
 	//Charts Handelers
 	http.HandleFunc("/chart/cpu", backend.CpuLineHandler)
 	http.HandleFunc("/chart/ram", backend.RamLineHandler)
+	http.HandleFunc("/chart/players", backend.PlayerLineHandler)
 
 	fmt.Println("Server listening on :8082")
 	log.Fatal(http.ListenAndServe(":"+backend.SavedAppConfig.WebAppConfig.Port, nil))

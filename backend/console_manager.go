@@ -35,11 +35,16 @@ type McServer struct {
 	active    bool
 	ws        *websocket.Conn
 	lastStats Stats
+	players   Players
 }
 
 type Stats struct {
 	cpu []float64
 	ram []uint64
+}
+type Players struct {
+	playersNames   []string
+	playersNumbers []int
 }
 
 type HTMXMessage struct {
@@ -159,8 +164,10 @@ func (mc *McServer) Start() error {
 			text := scanner.Text()
 			var logLevel = regexp.MustCompile(`\[Server thread/(\w+)\]`)
 
-			match := logLevel.FindStringSubmatch(text)
-			if match != nil {
+			var playerJoin = regexp.MustCompile(`([\w\-.]+) joined the game`)
+			var playerLeave = regexp.MustCompile(`([\w\-.]+) left the game`)
+
+			if match := logLevel.FindStringSubmatch(text); match != nil {
 				switch match[1] {
 				case "ERROR":
 					logMessage(mc.ws, "error", text)
@@ -172,6 +179,45 @@ func (mc *McServer) Start() error {
 			} else {
 				logMessage(mc.ws, "log", text)
 			}
+
+			if match := playerJoin.FindStringSubmatch(text); match != nil {
+				player := match[1]
+				mc.players.playersNames = append(mc.players.playersNames, player)
+				playerNumber := len(mc.players.playersNames)
+				if len(mc.players.playersNames) >= 0 {
+					playerNumber += 1
+				} else {
+					playerNumber = 0
+				}
+				mc.players.playersNumbers = append(mc.players.playersNumbers, playerNumber)
+				stats, _ := json.Marshal(map[string]interface{}{
+					"type":   "player",
+					"name":   player,
+					"number": playerNumber,
+				})
+				mc.ws.WriteMessage(websocket.TextMessage, stats)
+				fmt.Println(mc.players)
+			}
+
+			if match := playerLeave.FindStringSubmatch(text); match != nil {
+				player := match[1]
+				for i, p := range mc.players.playersNames {
+					if p == player {
+						mc.players.playersNames = append(mc.players.playersNames[:i], mc.players.playersNames[i+1:]...)
+						playerNumber := len(mc.players.playersNames)
+						if len(mc.players.playersNames) >= 0 {
+							playerNumber += 1
+						} else {
+							playerNumber = 0
+						}
+						mc.players.playersNumbers = append(mc.players.playersNumbers, len(mc.players.playersNames))
+						break
+					}
+				}
+				logMessage(mc.ws, "player", player)
+				fmt.Println(mc.players)
+			}
+
 		}
 		if err := scanner.Err(); err != nil {
 			fmt.Printf("\nError reading stdout: %v", err)
@@ -507,6 +553,65 @@ func RamLineHandler(w http.ResponseWriter, r *http.Request) {
 			charts.WithAreaStyleOpts(opts.AreaStyle{Opacity: opts.Float(0.4)}),
 			charts.WithLabelOpts(opts.Label{Show: opts.Bool(false)}),
 		)
+
+	var buf bytes.Buffer
+	renderer := render.NewChartRender(line, line.Validate)
+	renderer.Render(&buf)
+
+	w.Header().Set("Content-Type", "text/html")
+	w.Write(buf.Bytes())
+}
+
+func PlayerLineHandler(w http.ResponseWriter, r *http.Request) {
+	history := make([]int, len(mcServer.players.playersNames))
+	copy(history, mcServer.players.playersNumbers)
+	items := make([]opts.LineData, 30)
+	xAxis := make([]string, 30)
+
+	for i := 0; i < 30; i++ {
+		offset := 30 - len(history)
+		if i < offset {
+			items[i] = opts.LineData{Value: 0}
+		} else {
+			items[i] = opts.LineData{Value: history[i-offset]}
+		}
+		xAxis[i] = fmt.Sprintf("-%ds", (30-i)*2)
+	}
+
+	line := charts.NewLine()
+	line.SetGlobalOptions(
+		charts.WithXAxisOpts(opts.XAxis{
+			AxisLabel: &opts.AxisLabel{Show: opts.Bool(false)},
+		}),
+		charts.WithYAxisOpts(opts.YAxis{
+			Min:       "0",
+			Max:       "100",
+			AxisLabel: &opts.AxisLabel{Show: opts.Bool(false)},
+		}),
+		charts.WithInitializationOpts(opts.Initialization{
+			Width:     "250px",
+			Height:    "150px",
+			PageTitle: " ",
+		}),
+		charts.WithAnimation(false),
+		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(false)}),
+		charts.WithGridOpts(opts.Grid{
+			Top:          "0%",
+			Bottom:       "2.5%",
+			Left:         "0%",
+			Right:        "5%",
+			ContainLabel: opts.Bool(true),
+		}),
+	)
+
+	line.SetXAxis(xAxis).
+		AddSeries("Players", items).
+		SetSeriesOptions(
+			charts.WithAreaStyleOpts(opts.AreaStyle{Opacity: opts.Float(0.4)}),
+			charts.WithLabelOpts(opts.Label{Show: opts.Bool(false)}),
+		)
+
+	line.Render(w)
 
 	var buf bytes.Buffer
 	renderer := render.NewChartRender(line, line.Validate)

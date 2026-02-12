@@ -31,6 +31,19 @@
             </div>
         </div>
     </div>
+     <div class="card card-bordered w-[300px] bg-primary text-primary-content join-item">
+        <div class="card-body p-2 gap-0">
+            <h1 class="card-title text-sm" id="players">Players : ??</h1>
+            <div 
+                class="w-[300px] h-[200px]" 
+                id="playersChart" 
+                hx-get="/chart/players" 
+                hx-trigger="load, every 2s" 
+                hx-target="#playersChart"
+                hx-swap="innerHTML">
+            </div>
+        </div>
+    </div>
 </div>
 
 <div hx-ext="ws" ws-connect="/console/ws">
@@ -53,12 +66,14 @@
         if (data.type === "stats") {
             document.getElementById('cpuUsage').textContent ="CPU Usage : " + data.cpu.toFixed(2) + "%";
             document.getElementById('ramUsage').textContent ="RAM Usage : " + data.ram_mb + " Mb";
+            document.getElementById('players').textContent ="Players : " + data.number;
         } else {
             const pre = document.createElement('pre');
             const code = document.createElement('code');
 
             if (data.type === "error")        code.className = "text-error";
             else if (data.type === "stopped") code.className = "text-warning";
+            else if (data.type === "player") code.className = "text-info";
 
             code.textContent = data.text;
             pre.appendChild(code);
